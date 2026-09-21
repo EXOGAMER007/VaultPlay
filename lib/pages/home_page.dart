@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../widgets/now_playing_card.dart';
 import '../widgets/collection_summary.dart';
 import '../widgets/game_card.dart';
@@ -19,13 +20,15 @@ class HomePage extends StatelessWidget {
         child: SingleChildScrollView(
           // Padding kasih jarak pinggir biar ga nempel ke tepi layar
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 16.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 18.0,
+              vertical: 16.0,
+            ),
 
             // Column buat susun semua section dari atas ke bawah
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-
                 // bagian header: sapaan + icon profil
                 // Row biar sapaan di kiri, icon profil di kanan
                 Row(
@@ -38,10 +41,7 @@ class HomePage extends StatelessWidget {
                         // Text sapaan user
                         Text(
                           'Halo, Player! 🎮',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey,
-                          ),
+                          style: TextStyle(fontSize: 14, color: Colors.grey),
                         ),
                         SizedBox(height: 4),
                         // Text judul app
@@ -65,7 +65,8 @@ class HomePage extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(color: const Color(0xFF2E344D)),
                       ),
-                      child: const Icon( // Icon profil user
+                      child: const Icon(
+                        // Icon profil user
                         Icons.person,
                         color: Colors.deepPurpleAccent,
                         size: 26,
@@ -74,8 +75,9 @@ class HomePage extends StatelessWidget {
                   ],
                 ),
 
-                const SizedBox(height: 20), // SizedBox kasih spasi antar section
-
+                const SizedBox(
+                  height: 20,
+                ), // SizedBox kasih spasi antar section
                 // search bar
                 // Container sebagai background search
                 Container(
@@ -91,8 +93,12 @@ class HomePage extends StatelessWidget {
                       hintText: 'Cari koleksi game...',
                       hintStyle: TextStyle(color: Colors.grey, fontSize: 14),
                       border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                      suffixIcon: Icon( // Icon search di kanan textfield
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
+                      suffixIcon: Icon(
+                        // Icon search di kanan textfield
                         Icons.search,
                         color: Colors.grey,
                         size: 22,
@@ -104,7 +110,8 @@ class HomePage extends StatelessWidget {
                 const SizedBox(height: 22),
 
                 // section game yg lagi dimainkan
-                const Text( // Text judul section
+                const Text(
+                  // Text judul section
                   'Sedang Dimainkan 🔥',
                   style: TextStyle(
                     fontSize: 16,
@@ -118,7 +125,8 @@ class HomePage extends StatelessWidget {
                 const SizedBox(height: 22),
 
                 // section ringkasan koleksi
-                const Text( // Text judul section
+                const Text(
+                  // Text judul section
                   'Ringkasan Koleksi',
                   style: TextStyle(
                     fontSize: 16,
@@ -136,7 +144,8 @@ class HomePage extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: const [
-                    Text( // Text judul daftar
+                    Text(
+                      // Text judul daftar
                       'Daftar Game Terbaru',
                       style: TextStyle(
                         fontSize: 16,
@@ -144,7 +153,8 @@ class HomePage extends StatelessWidget {
                         color: Colors.white,
                       ),
                     ),
-                    Text( // Text lihat semua
+                    Text(
+                      // Text lihat semua
                       'Lihat Semua',
                       style: TextStyle(
                         fontSize: 12,
