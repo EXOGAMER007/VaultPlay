@@ -66,8 +66,7 @@ class HomePage extends StatelessWidget {
                         border: Border.all(color: const Color(0xFF2E344D)),
                       ),
                       child: const Icon(
-                        // Icon profil user
-                        Icons.person,
+                        Icons.person, // Icon profil
                         color: Colors.deepPurpleAccent,
                         size: 26,
                       ),
@@ -75,9 +74,8 @@ class HomePage extends StatelessWidget {
                   ],
                 ),
 
-                const SizedBox(
-                  height: 20,
-                ), // SizedBox kasih spasi antar section
+                const SizedBox(height: 20), // SizedBox kasih spasi antar section
+
                 // search bar
                 // Container sebagai background search
                 Container(
@@ -98,8 +96,7 @@ class HomePage extends StatelessWidget {
                         vertical: 14,
                       ),
                       suffixIcon: Icon(
-                        // Icon search di kanan textfield
-                        Icons.search,
+                        Icons.search, // Icon search di kanan textfield
                         color: Colors.grey,
                         size: 22,
                       ),
@@ -111,7 +108,6 @@ class HomePage extends StatelessWidget {
 
                 // section game yg lagi dimainkan
                 const Text(
-                  // Text judul section
                   'Sedang Dimainkan 🔥',
                   style: TextStyle(
                     fontSize: 16,
@@ -126,7 +122,6 @@ class HomePage extends StatelessWidget {
 
                 // section ringkasan koleksi
                 const Text(
-                  // Text judul section
                   'Ringkasan Koleksi',
                   style: TextStyle(
                     fontSize: 16,
@@ -145,7 +140,6 @@ class HomePage extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: const [
                     Text(
-                      // Text judul daftar
                       'Daftar Game Terbaru',
                       style: TextStyle(
                         fontSize: 16,
@@ -153,8 +147,7 @@ class HomePage extends StatelessWidget {
                         color: Colors.white,
                       ),
                     ),
-                    Text(
-                      // Text lihat semua
+                    Text( // lihat semua
                       'Lihat Semua',
                       style: TextStyle(
                         fontSize: 12,
@@ -176,6 +169,9 @@ class HomePage extends StatelessWidget {
                   icon: Icons.videogame_asset,
                   iconColor: Colors.amber,
                   statusColor: Colors.blueAccent,
+                  imagePath: 'assets/images/elden_ring.png',
+                  developer: 'FromSoftware',
+                  releaseYear: '2022',
                 ),
                 const GameCard(
                   title: 'God of War Ragnarok',
@@ -186,6 +182,9 @@ class HomePage extends StatelessWidget {
                   icon: Icons.shield,
                   iconColor: Colors.blueAccent,
                   statusColor: Colors.greenAccent,
+                  imagePath: 'assets/images/gow_ragnarok.png',
+                  developer: 'Santa Monica Studio',
+                  releaseYear: '2022',
                 ),
                 const GameCard(
                   title: 'Persona 5 Royal',
@@ -196,34 +195,14 @@ class HomePage extends StatelessWidget {
                   icon: Icons.flash_on,
                   iconColor: Colors.redAccent,
                   statusColor: Colors.amberAccent,
+                  imagePath: 'assets/images/persona5.png',
+                  developer: 'ATLUS',
+                  releaseYear: '2019',
                 ),
               ],
             ),
           ),
         ),
-      ),
-
-      // BottomNavigationBar - navigasi bawah (home, koleksi, profil)
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: const Color(0xFF141724),
-        selectedItemColor: Colors.deepPurpleAccent,
-        unselectedItemColor: Colors.grey,
-        currentIndex: 0,
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home), // Icon beranda
-            label: 'Beranda',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.sports_esports), // Icon koleksi
-            label: 'Koleksi',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person), // Icon profil
-            label: 'Profil',
-          ),
-        ],
       ),
     );
   }

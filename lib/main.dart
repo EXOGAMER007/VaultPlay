@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'pages/home_page.dart';
+import 'main_navigation.dart';
 
 void main() {
   runApp(const VaultPlayApp());
@@ -11,7 +11,7 @@ class VaultPlayApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // MaterialApp - konfigurasi tema dark mode dan halaman awal
+    // MaterialApp - konfigurasi tema dark mode dan halaman awal aplikasi
     return MaterialApp(
       title: 'VaultPlay',
       debugShowCheckedModeBanner: false,
@@ -24,7 +24,8 @@ class VaultPlayApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      home: const HomePage(),
+      // halaman awal diarahkan ke MainNavigation yang mengelola BottomNavigationBar
+      home: const MainNavigation(),
     );
   }
 }
