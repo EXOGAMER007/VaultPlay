@@ -1,8 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'main_navigation.dart';
+import 'providers/game_provider.dart';
 
 void main() {
-  runApp(const VaultPlayApp());
+  // ChangeNotifierProvider (package provider) - masang GameProvider di paling atas
+  // biar semua halaman di bawahnya bisa baca & ubah data game yg sama
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => GameProvider(),
+      child: const VaultPlayApp(),
+    ),
+  );
 }
 
 // root widget aplikasi VaultPlay

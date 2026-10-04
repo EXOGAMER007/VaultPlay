@@ -1,15 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../providers/game_provider.dart';
 import '../widgets/now_playing_card.dart';
 import '../widgets/collection_summary.dart';
 import '../widgets/game_card.dart';
 
 // halaman utama (home) VaultPlay
-class HomePage extends StatelessWidget {
+// jadi StatefulWidget karena ada search bar yg nyimpen teks pencarian
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  // teks pencarian yg lagi diketik
+  String _query = '';
+
+  @override
   Widget build(BuildContext context) {
+    // context.watch - ambil data game dari provider, rebuild kalo berubah
+    final allGames = context.watch<GameProvider>().games;
+    // kalo search kosong tampilin 3 game teratas, kalo ada isi tampilin yg cocok
+    final shownGames = _query.isEmpty
+        ? allGames.take(3).toList()
+        : allGames
+            .where((g) => g.title.toLowerCase().contains(_query.toLowerCase()))
+            .toList();
+
     // Scaffold - kerangka utama halaman ini
     return Scaffold(
       backgroundColor: const Color(0xFF11141E),
@@ -84,10 +104,15 @@ class HomePage extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: const Color(0xFF2C324B)),
                   ),
-                  // TextField input cari game
-                  child: const TextField(
-                    style: TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
+                  // TextField input cari game, onChanged update state tiap ngetik
+                  child: TextField(
+                    style: const TextStyle(color: Colors.white),
+                    onChanged: (value) {
+                      setState(() {
+                        _query = value;
+                      });
+                    },
+                    decoration: const InputDecoration(
                       hintText: 'Cari koleksi game...',
                       hintStyle: TextStyle(color: Colors.grey, fontSize: 14),
                       border: InputBorder.none,
@@ -135,21 +160,21 @@ class HomePage extends StatelessWidget {
                 const SizedBox(height: 24),
 
                 // section daftar game terbaru
-                // Row buat judul "Daftar Game" di kiri, "Lihat Semua" di kanan
+                // Row buat judul di kiri, keterangan di kanan
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: const [
+                  children: [
                     Text(
-                      'Daftar Game Terbaru',
-                      style: TextStyle(
+                      _query.isEmpty ? 'Daftar Game Terbaru' : 'Hasil Pencarian',
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
                     ),
-                    Text( // lihat semua
-                      'Lihat Semua',
-                      style: TextStyle(
+                    Text( // jumlah hasil kalo lagi nyari
+                      _query.isEmpty ? 'Terbaru' : '${shownGames.length} game',
+                      style: const TextStyle(
                         fontSize: 12,
                         color: Colors.deepPurpleAccent,
                         fontWeight: FontWeight.w600,
@@ -159,46 +184,18 @@ class HomePage extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
 
-                // list kartu game pake GameCard widget
-                const GameCard(
-                  title: 'Elden Ring',
-                  platform: 'PC',
-                  genre: 'Action RPG',
-                  rating: '5.0',
-                  status: 'Playing',
-                  icon: Icons.videogame_asset,
-                  iconColor: Colors.amber,
-                  statusColor: Colors.blueAccent,
-                  imagePath: 'assets/images/elden_ring.png',
-                  developer: 'FromSoftware',
-                  releaseYear: '2022',
-                ),
-                const GameCard(
-                  title: 'God of War Ragnarok',
-                  platform: 'PS5',
-                  genre: 'Action Adventure',
-                  rating: '4.9',
-                  status: 'Completed',
-                  icon: Icons.shield,
-                  iconColor: Colors.blueAccent,
-                  statusColor: Colors.greenAccent,
-                  imagePath: 'assets/images/gow_ragnarok.png',
-                  developer: 'Santa Monica Studio',
-                  releaseYear: '2022',
-                ),
-                const GameCard(
-                  title: 'Persona 5 Royal',
-                  platform: 'Switch',
-                  genre: 'JRPG',
-                  rating: '4.8',
-                  status: 'Wishlist',
-                  icon: Icons.flash_on,
-                  iconColor: Colors.redAccent,
-                  statusColor: Colors.amberAccent,
-                  imagePath: 'assets/images/persona5.png',
-                  developer: 'ATLUS',
-                  releaseYear: '2019',
-                ),
+                // kalo hasil pencarian kosong kasih pesan, kalo ada tampilin kartunya
+                if (shownGames.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 16),
+                    child: Text(
+                      'Game tidak ditemukan',
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  )
+                else
+                  // list kartu game pake GameCard widget
+                  ...shownGames.map((game) => GameCard(game: game)),
               ],
             ),
           ),

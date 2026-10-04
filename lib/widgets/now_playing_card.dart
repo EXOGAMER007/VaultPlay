@@ -1,30 +1,43 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../pages/game_detail_page.dart';
+import '../providers/game_provider.dart';
 
 // widget banner buat game yg lagi dimainkan sekarang
+// isinya ngikut data di provider, jadi berubah kalo status game diganti
 class NowPlayingCard extends StatelessWidget {
   const NowPlayingCard({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // context.watch - rebuild otomatis tiap data di provider berubah
+    final game = context.watch<GameProvider>().nowPlaying;
+
+    // kalo ga ada game yg lagi dimainkan, tampilin pesan kosong
+    if (game == null) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1C2030),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFF2C324B)),
+        ),
+        child: const Text(
+          'Belum ada game yang lagi dimainkan. Ubah status game jadi Playing dulu ya.',
+          style: TextStyle(fontSize: 12, color: Colors.grey),
+        ),
+      );
+    }
+
     // bungkus pake GestureDetector biar banner bisa diklik ke detail
     return GestureDetector(
       onTap: () {
-        // Navigator.push buat buka detail The Witcher 3
+        // Navigator.push buat buka detail game yg lagi dimainkan
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => const GameDetailPage(
-              title: 'The Witcher 3: Wild Hunt',
-              platform: 'PC',
-              genre: 'Open World RPG',
-              rating: '4.9',
-              status: 'Playing',
-              statusColor: Colors.blueAccent,
-              imagePath: 'assets/images/witcher3.png',
-              developer: 'CD Projekt Red',
-              releaseYear: '2015',
-            ),
+            builder: (context) => GameDetailPage(gameId: game.id),
           ),
         );
       },
@@ -60,9 +73,9 @@ class NowPlayingCard extends StatelessWidget {
                 color: const Color(0xFF111422),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Icon( // Icon controller game
-                Icons.sports_esports,
-                color: Colors.deepPurpleAccent,
+              child: Icon( // Icon game
+                game.icon,
+                color: game.iconColor,
                 size: 34,
               ),
             ),
@@ -92,9 +105,9 @@ class NowPlayingCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 6),
-                  const Text( // Text judul game
-                    'The Witcher 3: Wild Hunt',
-                    style: TextStyle(
+                  Text( // Text judul game
+                    game.title,
+                    style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
@@ -103,9 +116,9 @@ class NowPlayingCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
-                  const Text( // Text info platform & jam main
-                    'PC • 48 Jam Dimainkan',
-                    style: TextStyle(fontSize: 12, color: Colors.white70),
+                  Text( // Text info platform & jam main
+                    '${game.platform} • ${game.hoursPlayed} Jam Dimainkan',
+                    style: const TextStyle(fontSize: 12, color: Colors.white70),
                   ),
                 ],
               ),

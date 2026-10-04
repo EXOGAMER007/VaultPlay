@@ -1,55 +1,60 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../models/game.dart';
 import '../pages/game_detail_page.dart';
+import '../providers/game_provider.dart';
 
-// widget kartu game - bisa dipake ulang tinggal ganti parameternya
+// widget kartu game - bisa dipake ulang, tinggal kasih objek Game
 class GameCard extends StatelessWidget {
-  final String title;
-  final String platform;
-  final String genre;
-  final String rating;
-  final String status;
-  final IconData icon;
-  final Color iconColor;
-  final Color statusColor;
-  final String imagePath;
-  final String developer;
-  final String releaseYear;
+  final Game game;
 
-  const GameCard({
-    super.key,
-    required this.title,
-    required this.platform,
-    required this.genre,
-    required this.rating,
-    required this.status,
-    required this.icon,
-    required this.iconColor,
-    required this.statusColor,
-    this.imagePath = 'assets/images/elden_ring.png',
-    this.developer = 'Game Studio',
-    this.releaseYear = '2023',
-  });
+  const GameCard({super.key, required this.game});
+
+  // dialog konfirmasi sebelum game dihapus dari koleksi
+  void _confirmDelete(BuildContext context) {
+    // showDialog + AlertDialog buat konfirmasi hapus
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: const Color(0xFF1C2030),
+        title: const Text('Hapus game?', style: TextStyle(color: Colors.white)),
+        content: Text(
+          '${game.title} akan dihapus dari koleksimu.',
+          style: const TextStyle(color: Colors.grey),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Batal'),
+          ),
+          TextButton(
+            onPressed: () {
+              // context.read - panggil aksi di provider tanpa ikut rebuild
+              context.read<GameProvider>().removeGame(game.id);
+              Navigator.pop(dialogContext);
+            },
+            child: const Text(
+              'Hapus',
+              style: TextStyle(color: Colors.redAccent),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     // bungkus pake GestureDetector biar bisa diklik ke halaman detail
+    // tekan lama buat hapus
     return GestureDetector(
+      onLongPress: () => _confirmDelete(context),
       onTap: () {
         // Navigator.push buat buka halaman detail game
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => GameDetailPage(
-              title: title,
-              platform: platform,
-              genre: genre,
-              rating: rating,
-              status: status,
-              statusColor: statusColor,
-              imagePath: imagePath,
-              developer: developer,
-              releaseYear: releaseYear,
-            ),
+            builder: (context) => GameDetailPage(gameId: game.id),
           ),
         );
       },
@@ -73,7 +78,7 @@ class GameCard extends StatelessWidget {
                 color: const Color(0xFF272C42),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(icon, color: iconColor, size: 28), // Icon game
+              child: Icon(game.icon, color: game.iconColor, size: 28), // Icon game
             ),
             const SizedBox(width: 12), // SizedBox pemisah icon & info
 
@@ -83,7 +88,9 @@ class GameCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text( // Text judul game
-                    title,
+                    game.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
@@ -101,14 +108,17 @@ class GameCard extends StatelessWidget {
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text( // Text nama platform
-                          platform,
+                          game.platform,
                           style: const TextStyle(fontSize: 10, color: Colors.white70),
                         ),
                       ),
                       const SizedBox(width: 6),
-                      Text( // Text genre
-                        genre,
-                        style: const TextStyle(fontSize: 11, color: Colors.grey),
+                      Flexible(
+                        child: Text( // Text genre
+                          game.genre,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontSize: 11, color: Colors.grey),
+                        ),
                       ),
                     ],
                   ),
@@ -116,16 +126,27 @@ class GameCard extends StatelessWidget {
               ),
             ),
 
-            // bagian kanan: rating bintang + status
+            // bagian kanan: rating bintang + status + jam main
             Column( // Column susun rating di atas, status di bawah
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Row( // Row buat icon bintang sama angka rating
+                Row( // Row buat icon favorit, bintang sama angka rating
                   children: [
+                    // GestureDetector kecil buat toggle favorit langsung dari kartu
+                    GestureDetector(
+                      onTap: () =>
+                          context.read<GameProvider>().toggleFavorite(game.id),
+                      child: Icon(
+                        game.isFavorite ? Icons.favorite : Icons.favorite_border,
+                        color: game.isFavorite ? Colors.redAccent : Colors.grey,
+                        size: 18,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
                     const Icon(Icons.star, color: Colors.amber, size: 16), // Icon bintang
                     const SizedBox(width: 4),
                     Text( // Text rating
-                      rating,
+                      game.rating.toStringAsFixed(1),
                       style: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
@@ -136,8 +157,12 @@ class GameCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text( // Text status game (playing/completed/wishlist)
-                  status,
-                  style: TextStyle(fontSize: 11, color: statusColor),
+                  game.status,
+                  style: TextStyle(fontSize: 11, color: game.statusColor),
+                ),
+                Text( // Text jam main
+                  '${game.hoursPlayed} jam',
+                  style: const TextStyle(fontSize: 10, color: Colors.grey),
                 ),
               ],
             ),
