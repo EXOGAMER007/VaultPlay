@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/game_provider.dart';
+import '../providers/theme_provider.dart';
 
-// halaman profil user - statistik gaming, target tamat, dll
-// StatefulWidget karena target & switch pengaturan bisa berubah
+// halaman profil user - statistik gaming, target tamat, pilihan tema, dll
+// masih StatefulWidget karena ada TextEditingController buat input target
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
@@ -13,11 +14,15 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   // controller buat input target tamat
-  final TextEditingController _targetController = TextEditingController();
-  // target yg udah ditetapkan
-  int _target = 20;
-  // status switch sinkronisasi cloud
-  bool _syncOn = true;
+  late final TextEditingController _targetController;
+
+  @override
+  void initState() {
+    super.initState();
+    // isi awal textfield diambil dari target yg ada di provider
+    final target = context.read<GameProvider>().targetCompleted;
+    _targetController = TextEditingController(text: target.toString());
+  }
 
   @override
   void dispose() {
@@ -29,8 +34,13 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     // context.watch - statistik dihitung dari data game di provider
     final provider = context.watch<GameProvider>();
+    // context.watch - buat warna tema sama list pilihan tema
+    final themeProvider = context.watch<ThemeProvider>();
+    final accentColor = themeProvider.accentColor;
+
     final completed = provider.countByStatus('Completed');
-    final progress = _target == 0 ? 0.0 : (completed / _target).clamp(0.0, 1.0);
+    final target = provider.targetCompleted;
+    final progress = target == 0 ? 0.0 : (completed / target).clamp(0.0, 1.0);
 
     return Scaffold(
       backgroundColor: const Color(0xFF11141E),
@@ -70,28 +80,25 @@ class _ProfilePageState extends State<ProfilePage> {
                   // Row: avatar di kiri, info di kanan
                   child: Row(
                     children: [
-                      // avatar profil
+                      // avatar profil, border-nya ngikut warna tema
                       Container(
                         width: 65,
                         height: 65,
                         decoration: BoxDecoration(
                           color: const Color(0xFF272C42),
                           shape: BoxShape.circle,
-                          border: Border.all(
-                            color: Colors.deepPurpleAccent,
-                            width: 2,
-                          ),
+                          border: Border.all(color: accentColor, width: 2),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.deepPurpleAccent.withValues(alpha: 0.3),
+                              color: accentColor.withValues(alpha: 0.3),
                               blurRadius: 8,
                               offset: const Offset(0, 2),
                             ),
                           ],
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.person, // Icon avatar
-                          color: Colors.deepPurpleAccent,
+                          color: accentColor,
                           size: 38,
                         ),
                       ),
@@ -100,8 +107,8 @@ class _ProfilePageState extends State<ProfilePage> {
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: const [
-                            Text(
+                          children: [
+                            const Text(
                               'Alex "VaultHunter"',
                               style: TextStyle(
                                 fontSize: 17,
@@ -109,17 +116,17 @@ class _ProfilePageState extends State<ProfilePage> {
                                 color: Colors.white,
                               ),
                             ),
-                            SizedBox(height: 4),
+                            const SizedBox(height: 4),
                             Text(
                               'Level 28 • Hardcore Backlogger',
                               style: TextStyle(
                                 fontSize: 12,
-                                color: Colors.deepPurpleAccent,
+                                color: accentColor,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
-                            SizedBox(height: 4),
-                            Text(
+                            const SizedBox(height: 4),
+                            const Text(
                               'ID: #VP-89214',
                               style: TextStyle(fontSize: 11, color: Colors.grey),
                             ),
@@ -148,79 +155,21 @@ class _ProfilePageState extends State<ProfilePage> {
                   children: [
                     // kartu total jam bermain
                     Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF181C2B),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: const Color(0xFF2C324B)),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.2),
-                              blurRadius: 6,
-                              offset: const Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Icon(Icons.access_time_filled, color: Colors.amber, size: 24),
-                            const SizedBox(height: 8),
-                            Text(
-                              '${provider.totalHours} Jam',
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            const Text(
-                              'Waktu Bermain',
-                              style: TextStyle(fontSize: 11, color: Colors.grey),
-                            ),
-                          ],
-                        ),
+                      child: _statCard(
+                        icon: Icons.access_time_filled,
+                        iconColor: Colors.amber,
+                        value: '${provider.totalHours} Jam',
+                        label: 'Waktu Bermain',
                       ),
                     ),
                     const SizedBox(width: 12),
                     // kartu total game tamat
                     Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF181C2B),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: const Color(0xFF2C324B)),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.2),
-                              blurRadius: 6,
-                              offset: const Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Icon(Icons.emoji_events, color: Colors.greenAccent, size: 24),
-                            const SizedBox(height: 8),
-                            Text(
-                              '$completed Game',
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            const Text(
-                              'Sudah Tamat',
-                              style: TextStyle(fontSize: 11, color: Colors.grey),
-                            ),
-                          ],
-                        ),
+                      child: _statCard(
+                        icon: Icons.emoji_events,
+                        iconColor: Colors.greenAccent,
+                        value: '$completed Game',
+                        label: 'Sudah Tamat',
                       ),
                     ),
                   ],
@@ -259,15 +208,12 @@ class _ProfilePageState extends State<ProfilePage> {
                           controller: _targetController,
                           keyboardType: TextInputType.number,
                           style: const TextStyle(color: Colors.white),
-                          decoration: const InputDecoration(
-                            prefixIcon: Icon(
-                              Icons.flag_outlined,
-                              color: Colors.deepPurpleAccent,
-                            ),
+                          decoration: InputDecoration(
+                            prefixIcon: Icon(Icons.flag_outlined, color: accentColor),
                             hintText: 'Target game tamat (contoh: 20)',
-                            hintStyle: TextStyle(color: Colors.grey, fontSize: 13),
+                            hintStyle: const TextStyle(color: Colors.grey, fontSize: 13),
                             border: InputBorder.none,
-                            contentPadding: EdgeInsets.symmetric(
+                            contentPadding: const EdgeInsets.symmetric(
                               horizontal: 16,
                               vertical: 14,
                             ),
@@ -279,7 +225,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     // ElevatedButton buat nerapin target baru
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.deepPurple,
+                        backgroundColor: accentColor,
                         padding: const EdgeInsets.symmetric(
                           horizontal: 18,
                           vertical: 16,
@@ -292,9 +238,8 @@ class _ProfilePageState extends State<ProfilePage> {
                         final value = int.tryParse(_targetController.text);
                         // target harus angka lebih dari 0
                         if (value == null || value <= 0) return;
-                        setState(() {
-                          _target = value;
-                        });
+                        // simpen ke provider, bukan setState lagi
+                        context.read<GameProvider>().setTargetCompleted(value);
                         FocusScope.of(context).unfocus(); // tutup keyboard
                       },
                       child: const Text(
@@ -311,14 +256,14 @@ class _ProfilePageState extends State<ProfilePage> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      '$completed dari $_target game',
+                      '$completed dari $target game',
                       style: const TextStyle(fontSize: 12, color: Colors.white70),
                     ),
                     Text(
                       '${(progress * 100).round()}%',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
-                        color: Colors.deepPurpleAccent,
+                        color: accentColor,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -332,8 +277,44 @@ class _ProfilePageState extends State<ProfilePage> {
                     value: progress,
                     minHeight: 8,
                     backgroundColor: const Color(0xFF2C324B),
-                    color: Colors.deepPurpleAccent,
+                    color: accentColor,
                   ),
+                ),
+
+                const SizedBox(height: 22),
+
+                // section pilih warna tema
+                const Text(
+                  'Warna Tema 🎨',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 10),
+
+                // Wrap biar chip warnanya turun ke bawah kalo ga muat
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: themeProvider.accents.map((accent) {
+                    final selected = accent.id == themeProvider.currentAccent.id;
+                    // ChoiceChip tiap pilihan warna
+                    // pas dipilih panggil setAccent, terus semua halaman ikut ganti warna
+                    return ChoiceChip(
+                      avatar: Icon(accent.icon, size: 16, color: accent.accentColor),
+                      label: Text(accent.name),
+                      selected: selected,
+                      selectedColor: accent.accentColor.withValues(alpha: 0.3),
+                      labelStyle: TextStyle(
+                        color: selected ? Colors.white : Colors.grey,
+                      ),
+                      onSelected: (_) {
+                        context.read<ThemeProvider>().setAccent(accent.id);
+                      },
+                    );
+                  }).toList(),
                 ),
 
                 const SizedBox(height: 22),
@@ -374,34 +355,14 @@ class _ProfilePageState extends State<ProfilePage> {
                                 style: TextStyle(color: Colors.white, fontSize: 14),
                               ),
                             ),
-                            // Switch on/off sinkronisasi
+                            // Switch on/off sinkronisasi, nilainya dari provider
                             Switch(
-                              value: _syncOn,
-                              activeThumbColor: Colors.deepPurpleAccent,
+                              value: provider.cloudSyncEnabled,
+                              activeThumbColor: accentColor,
                               onChanged: (value) {
-                                setState(() {
-                                  _syncOn = value;
-                                });
+                                context.read<GameProvider>().toggleCloudSync(value);
                               },
                             ),
-                          ],
-                        ),
-                      ),
-                      Container(height: 1, color: const Color(0xFF2C324B)),
-                      // menu tema
-                      Padding(
-                        padding: const EdgeInsets.all(14.0),
-                        child: Row(
-                          children: const [
-                            Icon(Icons.palette_outlined, color: Colors.deepPurpleAccent),
-                            SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                'Tema Tampilan (Dark Violet)',
-                                style: TextStyle(color: Colors.white, fontSize: 14),
-                              ),
-                            ),
-                            Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey),
                           ],
                         ),
                       ),
@@ -415,7 +376,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             SizedBox(width: 12),
                             Expanded(
                               child: Text(
-                                'Tentang VaultPlay v1.3',
+                                'Tentang VaultPlay v1.4',
                                 style: TextStyle(color: Colors.white, fontSize: 14),
                               ),
                             ),
@@ -432,6 +393,52 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  // kartu statistik kecil, dibikin fungsi biar ga nulis 2x
+  Widget _statCard({
+    required IconData icon,
+    required Color iconColor,
+    required String value,
+    required String label,
+  }) {
+    // Container kotak statistik
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xFF181C2B),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFF2C324B)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.2),
+            blurRadius: 6,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      // Column susun icon, angka, label
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: iconColor, size: 24),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: const TextStyle(fontSize: 11, color: Colors.grey),
+          ),
+        ],
       ),
     );
   }

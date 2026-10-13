@@ -2,13 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'main_navigation.dart';
 import 'providers/game_provider.dart';
+import 'providers/theme_provider.dart';
 
 void main() {
-  // ChangeNotifierProvider (package provider) - masang GameProvider di paling atas
-  // biar semua halaman di bawahnya bisa baca & ubah data game yg sama
+  // MultiProvider - soalnya sekarang provider-nya ada 2 (game sama tema)
+  // jadi dipasang barengan di paling atas biar semua halaman bisa akses
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => GameProvider(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => GameProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+      ],
       child: const VaultPlayApp(),
     ),
   );
@@ -20,20 +24,14 @@ class VaultPlayApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // MaterialApp - konfigurasi tema dark mode dan halaman awal aplikasi
+    // watch ThemeProvider biar MaterialApp rebuild pas tema diganti
+    final themeProvider = context.watch<ThemeProvider>();
+
+    // MaterialApp - tema diambil dari ThemeProvider, halaman awal ke MainNavigation
     return MaterialApp(
       title: 'VaultPlay',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF11141E),
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.deepPurple,
-          brightness: Brightness.dark,
-        ),
-        useMaterial3: true,
-      ),
-      // halaman awal diarahkan ke MainNavigation yang mengelola BottomNavigationBar
+      theme: themeProvider.currentTheme,
       home: const MainNavigation(),
     );
   }

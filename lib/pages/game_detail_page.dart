@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/game.dart';
 import '../providers/game_provider.dart';
+import '../providers/theme_provider.dart';
 
 // halaman detail game, munculnya kalo klik salah satu kartu game
 // StatefulWidget karena ada input (jam, catatan) sama pilihan status yg bisa berubah
@@ -49,12 +50,13 @@ class _GameDetailPageState extends State<GameDetailPage> {
           hours: hours,
           notes: _notesController.text,
         );
+    final accentColor = context.read<ThemeProvider>().accentColor;
     // kasih snackbar notif dulu baru pop
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Catatan game berhasil disimpan!'),
-        backgroundColor: Colors.deepPurple,
-        duration: Duration(seconds: 1),
+      SnackBar(
+        content: const Text('Catatan game berhasil disimpan!'),
+        backgroundColor: accentColor,
+        duration: const Duration(seconds: 1),
       ),
     );
     // Navigator.pop buat balik
@@ -65,6 +67,7 @@ class _GameDetailPageState extends State<GameDetailPage> {
   Widget build(BuildContext context) {
     // context.watch biar tombol favorit langsung berubah pas diklik
     final game = context.watch<GameProvider>().getById(widget.gameId);
+    final accentColor = context.watch<ThemeProvider>().accentColor;
 
     // jaga-jaga kalo game ternyata udah kehapus
     if (game == null) {
@@ -436,10 +439,10 @@ class _GameDetailPageState extends State<GameDetailPage> {
                       width: double.infinity,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(12),
-                        // BoxShadow glow ungu biar tombolnya keliatan premium
+                        // BoxShadow glow biar tombolnya keliatan premium
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.deepPurple.withValues(alpha: 0.4),
+                            color: accentColor.withValues(alpha: 0.4),
                             blurRadius: 12,
                             offset: const Offset(0, 4),
                           ),
@@ -456,7 +459,7 @@ class _GameDetailPageState extends State<GameDetailPage> {
                           ),
                         ),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.deepPurple,
+                          backgroundColor: accentColor,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),

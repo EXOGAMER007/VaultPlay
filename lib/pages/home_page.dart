@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/game_provider.dart';
+import '../providers/theme_provider.dart';
 import '../widgets/now_playing_card.dart';
 import '../widgets/collection_summary.dart';
 import '../widgets/game_card.dart';
@@ -23,6 +24,8 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     // context.watch - ambil data game dari provider, rebuild kalo berubah
     final allGames = context.watch<GameProvider>().games;
+    // warna aksen dari tema yg dipilih di profil
+    final accentColor = context.watch<ThemeProvider>().accentColor;
     // kalo search kosong tampilin 3 game teratas, kalo ada isi tampilin yg cocok
     final shownGames = _query.isEmpty
         ? allGames.take(3).toList()
@@ -85,9 +88,9 @@ class _HomePageState extends State<HomePage> {
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(color: const Color(0xFF2E344D)),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.person, // Icon profil
-                        color: Colors.deepPurpleAccent,
+                        color: accentColor,
                         size: 26,
                       ),
                     ),
@@ -174,9 +177,9 @@ class _HomePageState extends State<HomePage> {
                     ),
                     Text( // jumlah hasil kalo lagi nyari
                       _query.isEmpty ? 'Terbaru' : '${shownGames.length} game',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
-                        color: Colors.deepPurpleAccent,
+                        color: accentColor,
                         fontWeight: FontWeight.w600,
                       ),
                     ),

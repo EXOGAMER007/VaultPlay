@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/game.dart';
 import '../providers/game_provider.dart';
+import '../providers/theme_provider.dart';
 
 // halaman form buat nambah game baru ke koleksi
 // StatefulWidget karena isi form (dropdown, slider, status) berubah2
@@ -84,10 +85,10 @@ class _AddGamePageState extends State<AddGamePage> {
     );
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Game baru ditambahkan ke koleksi!'),
-        backgroundColor: Colors.deepPurple,
-        duration: Duration(seconds: 1),
+      SnackBar(
+        content: const Text('Game baru ditambahkan ke koleksi!'),
+        backgroundColor: context.read<ThemeProvider>().primaryColor,
+        duration: const Duration(seconds: 1),
       ),
     );
     Navigator.pop(context);
@@ -95,6 +96,9 @@ class _AddGamePageState extends State<AddGamePage> {
 
   @override
   Widget build(BuildContext context) {
+    // warna tombol, slider dll ngikut tema
+    final themeProvider = context.watch<ThemeProvider>();
+
     return Scaffold(
       backgroundColor: const Color(0xFF11141E),
       // AppBar dengan tombol back otomatis
@@ -208,7 +212,7 @@ class _AddGamePageState extends State<AddGamePage> {
                   min: 1,
                   max: 5,
                   divisions: 8,
-                  activeColor: Colors.deepPurpleAccent,
+                  activeColor: themeProvider.accentColor,
                   onChanged: (value) {
                     setState(() {
                       _rating = value;
@@ -231,7 +235,7 @@ class _AddGamePageState extends State<AddGamePage> {
                       ),
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.deepPurple,
+                      backgroundColor: themeProvider.primaryColor,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),

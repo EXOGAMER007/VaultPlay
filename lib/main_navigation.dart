@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'pages/home_page.dart';
 import 'pages/collection_page.dart';
 import 'pages/profile_page.dart';
+import 'providers/theme_provider.dart';
 
 // pengatur navigasi utama pake BottomNavigationBar
 class MainNavigation extends StatefulWidget {
@@ -24,6 +26,9 @@ class _MainNavigationState extends State<MainNavigation> {
 
   @override
   Widget build(BuildContext context) {
+    // warna menu aktif ngikut tema yg dipilih
+    final accentColor = context.watch<ThemeProvider>().accentColor;
+
     return Scaffold(
       backgroundColor: const Color(0xFF11141E),
 
@@ -47,7 +52,7 @@ class _MainNavigationState extends State<MainNavigation> {
         // BottomNavigationBar - navigasi bawah
         child: BottomNavigationBar(
           backgroundColor: const Color(0xFF141724),
-          selectedItemColor: Colors.deepPurpleAccent,
+          selectedItemColor: accentColor,
           unselectedItemColor: Colors.grey,
           currentIndex: _currentIndex,
           type: BottomNavigationBarType.fixed,

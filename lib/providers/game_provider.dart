@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import '../models/game.dart';
 
+// pilihan urutan buat list koleksi
+enum GameSortOption { latest, titleAsc, ratingDesc, hoursDesc }
+
 // GameProvider = tempat nyimpen data game yg dipake bareng semua halaman
-// konsep di luar modul: ChangeNotifier + Provider
+// konsep: ChangeNotifier + Provider
 // tiap data berubah kita panggil notifyListeners(), terus widget yg
 // "mendengarkan" (context.watch / Consumer) otomatis rebuild
 // catatan: data cuma di memori, jadi balik ke awal kalo app ditutup
@@ -21,6 +24,7 @@ class GameProvider extends ChangeNotifier {
       developer: 'FromSoftware',
       releaseYear: '2022',
       hoursPlayed: 62,
+      isFavorite: true,
     ),
     Game(
       id: 'gow_ragnarok',
@@ -35,6 +39,7 @@ class GameProvider extends ChangeNotifier {
       developer: 'Santa Monica Studio',
       releaseYear: '2022',
       hoursPlayed: 48,
+      isFavorite: true,
     ),
     Game(
       id: 'persona5',
@@ -92,8 +97,20 @@ class GameProvider extends ChangeNotifier {
     ),
   ];
 
+  // target tamat & switch sync dipindah ke sini (sebelumnya di ProfilePage)
+  // biar nilainya ga ilang pas pindah2 halaman
+  int _targetCompleted = 20;
+  bool _cloudSyncEnabled = true;
+
+  // urutan koleksi yg lagi dipilih
+  GameSortOption _sortOption = GameSortOption.latest;
+
   // getter biar list aslinya ga bisa diubah dari luar sembarangan
   List<Game> get games => List.unmodifiable(_games);
+
+  int get targetCompleted => _targetCompleted;
+  bool get cloudSyncEnabled => _cloudSyncEnabled;
+  GameSortOption get sortOption => _sortOption;
 
   int get totalHours => _games.fold(0, (sum, g) => sum + g.hoursPlayed);
 
@@ -113,6 +130,41 @@ class GameProvider extends ChangeNotifier {
       if (g.id == id) return g;
     }
     return null;
+  }
+
+  // list game yg udah diurutin sesuai pilihan sort
+  // dicopy dulu biar urutan asli _games ga ikut keubah
+  List<Game> get sortedGames {
+    final list = List<Game>.from(_games);
+    switch (_sortOption) {
+      case GameSortOption.titleAsc:
+        list.sort((a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()));
+        break;
+      case GameSortOption.ratingDesc:
+        list.sort((a, b) => b.rating.compareTo(a.rating));
+        break;
+      case GameSortOption.hoursDesc:
+        list.sort((a, b) => b.hoursPlayed.compareTo(a.hoursPlayed));
+        break;
+      case GameSortOption.latest:
+        break;
+    }
+    return list;
+  }
+
+  void setTargetCompleted(int target) {
+    _targetCompleted = target;
+    notifyListeners();
+  }
+
+  void toggleCloudSync(bool value) {
+    _cloudSyncEnabled = value;
+    notifyListeners();
+  }
+
+  void setSortOption(GameSortOption option) {
+    _sortOption = option;
+    notifyListeners();
   }
 
   // game baru ditaruh paling atas biar langsung keliatan

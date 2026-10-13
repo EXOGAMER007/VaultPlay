@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/game.dart';
 import '../providers/game_provider.dart';
+import '../providers/theme_provider.dart';
 import '../widgets/game_card.dart';
 import 'add_game_page.dart';
 import 'game_detail_page.dart';
@@ -16,7 +17,7 @@ class CollectionPage extends StatefulWidget {
 }
 
 class _CollectionPageState extends State<CollectionPage> {
-  // filter yg aktif: 'Semua' atau salah satu status
+  // filter yg aktif: 'Semua', salah satu status, atau 'Favorit'
   String _filter = 'Semua';
   // teks pencarian
   String _query = '';
@@ -25,12 +26,20 @@ class _CollectionPageState extends State<CollectionPage> {
   Widget build(BuildContext context) {
     // context.watch - data game dari provider
     final provider = context.watch<GameProvider>();
+    final accentColor = context.watch<ThemeProvider>().accentColor;
     // game sorotan, kalo udah dihapus banner-nya ikut ilang
     final highlight = provider.getById('zelda');
 
-    // terapkan filter status + pencarian
-    final shownGames = provider.games.where((g) {
-      final matchStatus = _filter == 'Semua' || g.status == _filter;
+    // ambil list yg udah diurutin, terus terapin filter + pencarian
+    final shownGames = provider.sortedGames.where((g) {
+      bool matchStatus;
+      if (_filter == 'Semua') {
+        matchStatus = true;
+      } else if (_filter == 'Favorit') {
+        matchStatus = g.isFavorite;
+      } else {
+        matchStatus = g.status == _filter;
+      }
       final matchQuery = g.title.toLowerCase().contains(_query.toLowerCase());
       return matchStatus && matchQuery;
     }).toList();
@@ -59,7 +68,7 @@ class _CollectionPageState extends State<CollectionPage> {
                     // IconButton buat buka form tambah game
                     Container(
                       decoration: BoxDecoration(
-                        color: Colors.deepPurple,
+                        color: accentColor,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: IconButton(
@@ -96,7 +105,7 @@ class _CollectionPageState extends State<CollectionPage> {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  _buildHighlight(context, highlight),
+                  _buildHighlight(context, highlight, accentColor),
                   const SizedBox(height: 22),
                 ],
 
@@ -130,10 +139,11 @@ class _CollectionPageState extends State<CollectionPage> {
                 const SizedBox(height: 12),
 
                 // filter status pake ChoiceChip, bisa di-scroll ke samping
+                // ditambah 'Favorit' buat nampilin game yg di-love aja
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
-                    children: ['Semua', ...statusList].map((s) {
+                    children: ['Semua', ...statusList, 'Favorit'].map((s) {
                       final selected = _filter == s;
                       return Padding(
                         padding: const EdgeInsets.only(right: 8),
@@ -141,7 +151,7 @@ class _CollectionPageState extends State<CollectionPage> {
                         child: ChoiceChip(
                           label: Text(s),
                           selected: selected,
-                          selectedColor: Colors.deepPurple,
+                          selectedColor: accentColor,
                           labelStyle: TextStyle(
                             color: selected ? Colors.white : Colors.grey,
                           ),
@@ -158,25 +168,48 @@ class _CollectionPageState extends State<CollectionPage> {
 
                 const SizedBox(height: 18),
 
-                // header daftar game + jumlah (otomatis ngikut hasil filter)
+                // header daftar game + jumlah + tombol urutkan
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      'Semua Koleksi',
-                      style: TextStyle(
+                    Text(
+                      'Semua Koleksi (${shownGames.length})',
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
                     ),
-                    Text(
-                      '${shownGames.length} Game',
-                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    // PopupMenuButton buat pilih urutan
+                    // pilihannya disimpen di GameProvider, jadi pake context.read
+                    PopupMenuButton<GameSortOption>(
+                      color: const Color(0xFF1C2030),
+                      initialValue: provider.sortOption,
+                      icon: Icon(Icons.sort, color: accentColor),
+                      onSelected: (option) {
+                        context.read<GameProvider>().setSortOption(option);
+                      },
+                      itemBuilder: (context) => const [
+                        PopupMenuItem(
+                          value: GameSortOption.latest,
+                          child: Text('Terbaru', style: TextStyle(color: Colors.white)),
+                        ),
+                        PopupMenuItem(
+                          value: GameSortOption.titleAsc,
+                          child: Text('Judul A-Z', style: TextStyle(color: Colors.white)),
+                        ),
+                        PopupMenuItem(
+                          value: GameSortOption.ratingDesc,
+                          child: Text('Rating tertinggi', style: TextStyle(color: Colors.white)),
+                        ),
+                        PopupMenuItem(
+                          value: GameSortOption.hoursDesc,
+                          child: Text('Jam main terbanyak', style: TextStyle(color: Colors.white)),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-                const SizedBox(height: 4),
                 const Text(
                   'Tekan lama kartu game buat hapus',
                   style: TextStyle(fontSize: 11, color: Colors.grey),
@@ -205,7 +238,7 @@ class _CollectionPageState extends State<CollectionPage> {
   }
 
   // banner sorotan game, klik buat buka detail
-  Widget _buildHighlight(BuildContext context, Game game) {
+  Widget _buildHighlight(BuildContext context, Game game, Color accentColor) {
     return GestureDetector(
       onTap: () {
         // Navigator.push buat buka halaman detail
@@ -267,7 +300,7 @@ class _CollectionPageState extends State<CollectionPage> {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.deepPurple,
+                    color: accentColor,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Text(
